@@ -1,12 +1,12 @@
-# Step 1: Use a JDK image to build/run
-FROM eclipse-temurin:17-jdk-alpine
-
-# Step 2: Set working directory
+# Stage 1: Build the JAR
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Step 3: Copy jar from target
-COPY target/demo-0.0.1-SNAPSHOT.jar app.jar
-
-# Step 4: Run the jar
+# Stage 2: Run the app
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+COPY --from=build /app/target/demo-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java","-jar","app.jar"]
-
